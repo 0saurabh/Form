@@ -194,46 +194,68 @@ const ActivityReportForm: React.FC = () => {
     setCurrentEditId(null);
   };
 
-  const exportToPDF = (data: ActivityReport = formData) => {
-    // Switch to preview mode before export
-    setIsPreviewMode(true);
+ const exportToPDF = (data: ActivityReport = formData) => {
+  // Switch to preview mode before export
+  setIsPreviewMode(true);
 
-    // Give time for DOM to update
-    setTimeout(() => {
-      const element = document.getElementById("report-content");
+  // Give time for DOM to update
+  setTimeout(() => {
+    const element = document.getElementById("report-content");
 
-      const opt = {
-        margin: 0,
-        filename: `Activity_Report_${data.year1}_${data.year2}.pdf`,
-        image: { type: "jpeg", quality: 1 },
-        html2canvas: {
-          scale: 3,
-          useCORS: true,
-          allowTaint: true,
-          logging: true,
-          scrollX: 0,
-          scrollY: 0,
-          windowWidth: 794,
-          windowHeight: 1123,
-        },
-        jsPDF: {
-          unit: "px",
-          format: [794, 1123],
-          orientation: "portrait",
-        },
-      };
+    // Generate Date (No Day) for Filename
+    const activityDate = formData.date
+      ? `${new Date(formData.date).toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        }).replace(/\//g, '_')}`  // Replace slashes with underscores
+      : 'No-Date';
 
-      html2pdf().set(opt).from(element).save().then(() => {
+    const activityTitle = formData.activityTitle
+      ? formData.activityTitle.replace(/\s+/g, '_').substring(0, 30) // Limit to 30 chars
+      : 'No-Title';
+
+    // Compose Dynamic Filename (Date_Title.pdf)
+    const filename = `${activityDate}_${activityTitle}.pdf`;
+
+    const opt = {
+      margin: 0,
+      filename: filename,
+      image: { type: "jpeg", quality: 1 },
+      html2canvas: {
+        scale: 3,
+        useCORS: true,
+        allowTaint: true,
+        logging: true,
+        scrollX: 0,
+        scrollY: 0,
+        windowWidth: 794,
+        windowHeight: 1123,
+      },
+      jsPDF: {
+        unit: "px",
+        format: [794, 1123],
+        orientation: "portrait",
+      },
+    };
+
+    // Generate PDF
+    html2pdf()
+      .set(opt)
+      .from(element)
+      .save()
+      .then(() => {
         // Revert back to editable mode after export
         setIsPreviewMode(false);
       });
-    }, 100);
-  };
+  }, 100);
+};
+
 
   return (
     <div className="max-w-5xl mx-auto p-4 space-y-4">
       {/* College Header - Web View */}
-      <div className="overflow-hidden whitespace-nowrap">
+      <div className=" overflow-hidden whitespace-nowrap">
         <div className="inline-block animate-scroll text-lg font-bold text-center text-red-600">
           Official Academic Activity Form — Sheth L.U & M.V College of Science & Technology
         </div>
@@ -572,63 +594,112 @@ const ActivityReportForm: React.FC = () => {
           <h3 className="font-bold text-sm mb-2 text-center">ACTIVITY DETAILS</h3>
           <div className="border border-black">
             <div className="grid grid-cols-2 gap-0">
+              {/* Topic / Subject */}
               <div className="border-r border-black p-2">
                 <label className="block font-bold text-xs mb-1">Topic / Subject:</label>
                 {isPreviewMode ? (
-                  <div className="w-full bg-transparent min-h-[3rem] text-xs">{formData.topic}</div>
+                  <div className="w-full bg-transparent min-h-[3rem] text-xs break-words">{formData.topic}</div>
                 ) : (
-                  <textarea
-                    value={formData.topic}
-                    onChange={(e) => setFormData(prev => ({ ...prev, topic: e.target.value }))}
-                    className="w-full bg-transparent resize-none h-12 text-xs"
-                    rows={2}
-                  />
+                  <>
+                    <textarea
+                      value={formData.topic}
+                      onChange={(e) => {
+                        const words = e.target.value.trim().split(/\s+/);
+                        if (words.length <= 40) {
+                          setFormData((prev) => ({ ...prev, topic: e.target.value }));
+                        }
+                      }}
+                      className="w-full bg-transparent resize-none h-12 text-xs"
+                      rows={2}
+                    />
+                    <div className="text-right text-[10px] text-gray-500">
+                      {formData.topic.trim().split(/\s+/).filter(Boolean).length}/40 words
+                    </div>
+                  </>
                 )}
               </div>
+
+              {/* Objectives */}
               <div className="p-2">
                 <label className="block font-bold text-xs mb-1">Objectives:</label>
                 {isPreviewMode ? (
-                  <div className="w-full bg-transparent min-h-[3rem] text-xs">{formData.objectives}</div>
+                  <div className="w-full bg-transparent min-h-[3rem] text-xs break-words">{formData.objectives}</div>
                 ) : (
-                  <textarea
-                    value={formData.objectives}
-                    onChange={(e) => setFormData(prev => ({ ...prev, objectives: e.target.value }))}
-                    className="w-full bg-transparent resize-none h-12 text-xs"
-                    rows={2}
-                  />
+                  <>
+                    <textarea
+                      value={formData.objectives}
+                      onChange={(e) => {
+                        const words = e.target.value.trim().split(/\s+/);
+                        if (words.length <= 40) {
+                          setFormData((prev) => ({ ...prev, objectives: e.target.value }));
+                        }
+                      }}
+                      className="w-full bg-transparent resize-none h-12 text-xs"
+                      rows={2}
+                    />
+                    <div className="text-right text-[10px] text-gray-500">
+                      {formData.objectives.trim().split(/\s+/).filter(Boolean).length}/40 words
+                    </div>
+                  </>
                 )}
               </div>
             </div>
+
             <div className="grid grid-cols-2 gap-0 border-t border-black">
+              {/* Methodology */}
               <div className="border-r border-black p-2">
                 <label className="block font-bold text-xs mb-1">Methodology:</label>
                 {isPreviewMode ? (
-                  <div className="w-full bg-transparent min-h-[3rem] text-xs">{formData.methodology}</div>
+                  <div className="w-full bg-transparent min-h-[3rem] text-xs break-words">{formData.methodology}</div>
                 ) : (
-                  <textarea
-                    value={formData.methodology}
-                    onChange={(e) => setFormData(prev => ({ ...prev, methodology: e.target.value }))}
-                    className="w-full bg-transparent resize-none h-12 text-xs"
-                    rows={2}
-                  />
+                  <>
+                    <textarea
+                      value={formData.methodology}
+                      onChange={(e) => {
+                        const words = e.target.value.trim().split(/\s+/);
+                        if (words.length <= 40) {
+                          setFormData((prev) => ({ ...prev, methodology: e.target.value }));
+                        }
+                      }}
+                      className="w-full bg-transparent resize-none h-12 text-xs"
+                      rows={2}
+                    />
+                    <div className="text-right text-[10px] text-gray-500">
+                      {formData.methodology.trim().split(/\s+/).filter(Boolean).length}/40 words
+                    </div>
+                  </>
                 )}
               </div>
+
+              {/* Outcomes */}
               <div className="p-2">
                 <label className="block font-bold text-xs mb-1">Outcomes:</label>
                 {isPreviewMode ? (
-                  <div className="w-full bg-transparent min-h-[3rem] text-xs">{formData.outcomes}</div>
+                  <div className="w-full bg-transparent min-h-[3rem] text-xs break-words">{formData.outcomes}</div>
                 ) : (
-                  <textarea
-                    value={formData.outcomes}
-                    onChange={(e) => setFormData(prev => ({ ...prev, outcomes: e.target.value }))}
-                    className="w-full bg-transparent resize-none h-12 text-xs"
-                    rows={2}
-                  />
+                  <>
+                    <textarea
+                      value={formData.outcomes}
+                      onChange={(e) => {
+                        const words = e.target.value.trim().split(/\s+/);
+                        if (words.length <= 40) {
+                          setFormData((prev) => ({ ...prev, outcomes: e.target.value }));
+                        }
+                      }}
+                      className="w-full bg-transparent resize-none h-12 text-xs"
+                      rows={2}
+                    />
+                    <div className="text-right text-[10px] text-gray-500">
+                      {formData.outcomes.trim().split(/\s+/).filter(Boolean).length}/40 words
+                    </div>
+                  </>
                 )}
               </div>
             </div>
           </div>
         </div>
+
+
 
         {/* Documentation Section */}
         <div className="mb-3">
@@ -919,7 +990,7 @@ const ActivityReportForm: React.FC = () => {
           <label className="block font-bold text-xs mb-4">Remark:</label>
 
         </div>
-        
+
 
       </div>
 
