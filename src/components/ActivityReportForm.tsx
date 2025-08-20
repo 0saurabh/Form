@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import html2pdf from 'html2pdf.js';
-import logo from '/uploads/logo.png';
+import logo2 from '/uploads/logo2.png';
 
 
 interface ActivityReport {
@@ -268,7 +268,7 @@ const ActivityReportForm: React.FC = () => {
       >
         {/* College Header */}
         <div className="w-full border-b border-black mb-3">
-          <img src={logo} alt="College Logo" className="w-full h-auto object-contain" />
+          <img src={logo2} alt="College Logo" className="w-full h-auto object-contain" />
         </div>
 
 
